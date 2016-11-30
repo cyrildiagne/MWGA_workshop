@@ -7,8 +7,12 @@ var ctx;
 var particles = [];
 var repel = true;
 var mouse = null;
+var numBallsFloating = 0;
 
-const CIRCLE_RADIUS = 5;
+var msgQueue = [];
+var isSendingLocked = false;
+
+const CIRCLE_RADIUS = 5 * devicePixelRatio;
 
 function setup() {
   setupWebSockets();
@@ -30,8 +34,8 @@ function addParticle() {
   var x = canvas.width * Math.random(),
     y = canvas.height * Math.random();
   if (mouse) {
-    x = mouse.x;
-    y = mouse.y;
+    x = mouse.x + (Math.random() - 0.5) * 2 * 30;
+    y = mouse.y + (Math.random() - 0.5) * 2 * 30;
   }
   particles.push({
     x: x,
@@ -59,19 +63,34 @@ function onWSError(evt) {
   console.error(evt);
 }
 function onWSMessage(evt) {
-  console.log(evt);
   json = JSON.parse(evt.data);
   if (json.hasOwnProperty('id') && json.id === 0) {
-    // initialize first client with 50 particles
-    for (var i = 0; i < 50; i++) {
+    // initialize first client with some particles
+    for (var i = 0; i < 100; i++) {
       addParticle();
     }
+  } else if (json.hasOwnProperty('balls')) {
+    numBallsFloating = json.balls;
+  } else if (json.hasOwnProperty('status')) {
+    isSendingLocked = false;
   }
+}
+function sendNextMessage() {
+  if (isSendingLocked || !msgQueue.length) return;
+  var val = msgQueue.shift();
+  websocket.send(val);
+  isSendingLocked = true;
 }
 
 
 function update() {
   requestAnimationFrame(update);
+
+  if (numBallsFloating > 1 && !isSendingLocked && repel && mouse) {
+    addParticle();
+    msgQueue.push('/balls/out');
+  }
+
   var x;
   var y;
   var d2;
@@ -99,7 +118,19 @@ function update() {
     // integrate velocity
     p.x += p.xv;
     p.y += p.yv;
+    // test if the ball should enter floating mode
+    if (!repel) {
+      d2 = x * x + y * y;
+      if (d2 < 1000) {
+        console.log('ball sucked');
+        msgQueue.push('/balls/in');
+        particles.splice(i, 1);
+        i--;
+      }
+    }
   }
+
+  sendNextMessage();
 
   draw();
 }
@@ -108,7 +139,7 @@ function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = 'rgba(255,255,255,1)';
   for (var i = 0; i < particles.length; i++) {
-    var p = particles[i]
+    var p = particles[i];
     ctx.beginPath();
     ctx.arc(p.x, p.y, CIRCLE_RADIUS, 0, 2 * Math.PI, false);
     ctx.fill();
@@ -116,38 +147,43 @@ function draw() {
 }
 
 function start(ev) {
+  if (ev.altKey) {
+    repel = false;
+  }
   if (ev.touches) {
     ev.clientX = ev.touches[0].clientX;
     ev.clientY = ev.touches[0].clientY;
   }
   mouse = {
-    x: ev.clientX,
-    y: ev.clientY
+    x: ev.clientX * devicePixelRatio,
+    y: ev.clientY * devicePixelRatio
   };
   window.addEventListener('touchmove', move, false);
   window.addEventListener('mousemove', move, false);
 }
 
 function move(ev) {
+  ev.preventDefault();
   if (ev.touches) {
     ev.clientX = ev.touches[0].clientX;
     ev.clientY = ev.touches[0].clientY;
   }
   mouse = {
-    x: ev.clientX,
-    y: ev.clientY
+    x: ev.clientX * devicePixelRatio,
+    y: ev.clientY * devicePixelRatio
   };
 }
 
 function end(ev) {
   mouse = null;
+  repel = true;
   window.removeEventListener('touchmove', move, false);
   window.removeEventListener('mousemove', move, false);
 }
 
 function onResize() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  canvas.width = window.innerWidth * devicePixelRatio;
+  canvas.height = window.innerHeight * devicePixelRatio;
 }
 
 setup();
