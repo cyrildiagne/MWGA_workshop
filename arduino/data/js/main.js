@@ -69,6 +69,8 @@ function onWSMessage(evt) {
     for (var i = 0; i < 100; i++) {
       addParticle();
     }
+  } else if (json.hasOwnProperty('button')) {
+    repel = json.button;
   } else if (json.hasOwnProperty('balls')) {
     numBallsFloating = json.balls;
   } else if (json.hasOwnProperty('status')) {
@@ -99,7 +101,7 @@ function update() {
     if (mouse) {
       x = mouse.x - p.x;
       y = mouse.y - p.y;
-      d2 = Math.pow((x * x + y * y) / 500, 1.5);
+      d2 = Math.pow((x * x + y * y) / 500, 1.2);
       d2 = d2 > 500 ? d2 : 500;
     } else {
       x = y = 0;
@@ -119,10 +121,9 @@ function update() {
     p.x += p.xv;
     p.y += p.yv;
     // test if the ball should enter floating mode
-    if (!repel) {
+    if (mouse && !repel) {
       d2 = x * x + y * y;
       if (d2 < 1000) {
-        console.log('ball sucked');
         msgQueue.push('/balls/in');
         particles.splice(i, 1);
         i--;
@@ -147,9 +148,6 @@ function draw() {
 }
 
 function start(ev) {
-  if (ev.altKey) {
-    repel = false;
-  }
   if (ev.touches) {
     ev.clientX = ev.touches[0].clientX;
     ev.clientY = ev.touches[0].clientY;
@@ -176,7 +174,6 @@ function move(ev) {
 
 function end(ev) {
   mouse = null;
-  repel = true;
   window.removeEventListener('touchmove', move, false);
   window.removeEventListener('mousemove', move, false);
 }
