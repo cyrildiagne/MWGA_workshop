@@ -8,37 +8,6 @@ int numBallsFloating = 0;
 int buttonPin = 12;
 int buttonValue = -1;
 
-void setup() {
-  delay(1000);
-  Serial.begin(115200);
-  Serial.println();
-
-  createWifi("esp8266", "makewiresgreatagain");
-  //connectToWifi("kikko", "karen1409");
-  mwga.setup();
-  mwga.onConnect(onClientConnect);
-  mwga.on("/balls/in", onBallIn);
-  mwga.on("/balls/out", onBallOut);
-  // set pin 16 as input
-  pinMode(buttonPin, INPUT_PULLUP);
-}
-
-void loop() {
-  int val = digitalRead(buttonPin);
-  if (val != buttonValue) {
-    String json = "{\"button\":" + String(val) + "}";
-    mwga.broadcast(json);
-    buttonValue = val;
-    Serial.println("button value is now " + String(val));
-  }
-  if (buttonState == HIGH) {
-    digitalWrite(13, LOW);
-  } else {
-    digitalWrite(13, HIGH);
-  }
-  mwga.update();
-}
-
 void onClientConnect(int clientId){
   if (clientId == 0) {
     numBallsFloating = 0;
@@ -88,3 +57,30 @@ void createWifi(const char* ssid, const char* password){
   Serial.println("Creating Wifi access point:" + String(ssid));
   Serial.println("Access Point IP:" + WiFi.softAPIP().toString());
 }
+
+void setup() {
+  delay(1000);
+  Serial.begin(115200);
+  Serial.println();
+
+  //createWifi("esp8266-cyril", "makewiresgreatagain");
+  connectToWifi("TempForWorkshop", "ecal2016");
+  mwga.setup();
+  mwga.onConnect(onClientConnect);
+  mwga.on("/balls/in", onBallIn);
+  mwga.on("/balls/out", onBallOut);
+  // set pin 12 as input
+  pinMode(D6, INPUT_PULLUP);
+}
+
+void loop() {
+  int val = digitalRead(buttonPin);
+  if (val != buttonValue) {
+    String json = "{\"button\":" + String(val) + "}";
+    mwga.broadcast(json);
+    buttonValue = val;
+    Serial.println("button value is now " + String(val));
+  }
+  mwga.update();
+}
+
