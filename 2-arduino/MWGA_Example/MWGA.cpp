@@ -16,7 +16,7 @@ void MWGA::setup(){
   // setup endpoints routes
   server.on("/", _bind(getIndex));
   server.on("/monitor", _bind(getMonitor));
-  server.on("/edit", HTTP_GET, _bind(getEditor));
+  server.on("/editor", HTTP_GET, _bind(getEditor));
   // setup api routes
   server.on("/api/fs", HTTP_GET, _bind(handleFileList));
   server.on("/api/fs", HTTP_PUT, _bind(handleFileCreate));
@@ -56,13 +56,13 @@ void MWGA::getIndex(){
 }
 
 void MWGA::getMonitor(){
-  if(!handleFileRead("/_editor/monitor.html")) {
+  if(!handleFileRead("/_monitor/monitor.html")) {
     server.send(404, "text/plain", "FileNotFound");
   }
 }
 
 void MWGA::getEditor() {
-  if(!handleFileRead("/_editor/edit.html")) {
+  if(!handleFileRead("/_editor/editor.html")) {
     server.send(404, "text/plain", "FileNotFound");
   }
 }

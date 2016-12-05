@@ -20,7 +20,7 @@
 <head>
   <meta http-equiv="Content-type" content="text/html; charset=utf-8">
   <title>Monitor</title>
-  <script type="text/javascript" src="_editor/graphs.js"></script>
+  <script type="text/javascript" src="_monitor/graphs.js"></script>
   <script type="text/javascript">
     var heap,temp,digi;
     var reloadPeriod = 1000;
@@ -78,7 +78,7 @@
 
       temp = createGraph(document.getElementById("analog"), "Analog Input", 100, 128, 0, 1023, false, "cyan");
       heap = createGraph(document.getElementById("heap"), "Current Heap", 100, 125, 0, 30000, true, "orange");
-      digi = createDigiGraph(document.getElementById("digital"), "GPIO", 100, 146, [0, 4, 5, 16], "gold");
+      digi = createDigiGraph(document.getElementById("digital"), "GPIO", 100, 146, [0, 4, 5, 12], "gold");
       run();
     }
   </script>
