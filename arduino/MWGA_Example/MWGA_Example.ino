@@ -5,20 +5,32 @@
 MWGA mwga;
 
 int numBallsFloating = 0;
+int buttonPin = 16;
+int buttonValue = -1;
 
 void setup() {
-	delay(1000);
-	Serial.begin(115200);
+  delay(1000);
+  Serial.begin(115200);
   Serial.println();
-  
-  connectToWifi("kikko", "karen1409");
+
+  createWifi("esp8266", "makewiresgreatagain");
+  //connectToWifi("kikko", "karen1409");
   mwga.setup();
   mwga.onConnect(onClientConnect);
   mwga.on("/balls/in", onBallIn);
   mwga.on("/balls/out", onBallOut);
+  // set pin 16 as input
+  pinMode(buttonPin, INPUT);
 }
 
 void loop() {
+  int val = digitalRead(buttonPin);
+  if (val != buttonValue) {
+    String json = "{\"button\":" + String(val) + "}";
+    mwga.broadcast(json);
+    buttonValue = val;
+    Serial.println("button value is now " + String(val));
+  }
   mwga.update();
 }
 
