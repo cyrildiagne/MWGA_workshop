@@ -5,7 +5,7 @@
 MWGA mwga;
 
 int numBallsFloating = 0;
-int buttonPin = 16;
+int buttonPin = 12;
 int buttonValue = -1;
 
 void setup() {
@@ -20,7 +20,7 @@ void setup() {
   mwga.on("/balls/in", onBallIn);
   mwga.on("/balls/out", onBallOut);
   // set pin 16 as input
-  pinMode(buttonPin, INPUT);
+  pinMode(buttonPin, INPUT_PULLUP);
 }
 
 void loop() {
@@ -30,6 +30,11 @@ void loop() {
     mwga.broadcast(json);
     buttonValue = val;
     Serial.println("button value is now " + String(val));
+  }
+  if (buttonState == HIGH) {
+    digitalWrite(13, LOW);
+  } else {
+    digitalWrite(13, HIGH);
   }
   mwga.update();
 }
