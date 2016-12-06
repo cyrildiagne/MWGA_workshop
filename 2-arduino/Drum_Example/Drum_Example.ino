@@ -3,7 +3,7 @@
 #include "MWGA.h"
 
 MWGA mwga;
-int initSequenceTime;
+int initSequenceTime = -1;
 
 int buttonPin = 12;
 int buttonValue = -1;
@@ -48,11 +48,11 @@ void loop() {
   int val = digitalRead(buttonPin);
   if (val != buttonValue) {
     if (val == 0) {
-      if (currentSequence == "") {
+      if (initSequenceTime > 0) {
         initSequenceTime = millis();
-        mgwa.broadcast("0");
+        mwga.broadcast("0");
       } else {
-        mgwa.broadcast( String(millis()-initSequenceTime) );
+        mwga.broadcast( String(millis()-initSequenceTime) );
       }
     }
     buttonValue = val;
