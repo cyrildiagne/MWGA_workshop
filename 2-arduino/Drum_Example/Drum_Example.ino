@@ -48,7 +48,7 @@ void loop() {
   int val = digitalRead(buttonPin);
   if (val != buttonValue) {
     if (val == 0) {
-      if (initSequenceTime > 0) {
+      if (initSequenceTime < 0) {
         initSequenceTime = millis();
         mwga.broadcast("0");
       } else {
