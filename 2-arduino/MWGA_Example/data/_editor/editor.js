@@ -34,11 +34,15 @@ function createEditor(element, file, type) {
     xmlHttp.send(null);
   }
 
+  function getLangFromFilename(file){
+    return /(?:\.([^.]+))?$/.exec(file)[1];
+  }
+
   if (typeof file === "undefined") {
     file = "/js/main.js";
   }
 
-  var lang = /(?:\.([^.]+))?$/.exec(file)[1];
+  var lang = getLangFromFilename(file);
 
   type = type || "text/" + lang;
 
@@ -59,7 +63,7 @@ function createEditor(element, file, type) {
     file = filename;
     lang = getLangFromFilename(file);
     type = "text/" + lang;
-    if (lang !== "plain") editor.getSession().setMode("ace/mode/" + lang);
+    // if (lang !== "plain") editor.getSession().setMode("ace/mode/" + lang);
     httpGet(file);
   }
   editor.save = function() {

@@ -179,7 +179,7 @@ function createTree(element, editor) {
     if (isTextFile(path)) {
       action.innerHTML = "<span>Edit</span>";
       action.onclick = function(e) {
-        editor.loadUrl(path);
+        editor.load(path);
         if (document.body.getElementsByClassName('contextMenu').length > 0) document.body.removeChild(el);
       };
     } else if (isImageFile(path)) {
@@ -235,7 +235,7 @@ function createTree(element, editor) {
     leaf.appendChild(label);
     leaf.onclick = function(e) {
       if (isTextFile(leaf.id)) {
-        editor.loadUrl(leaf.id);
+        editor.load(leaf.id);
       } else if (isImageFile(leaf.id)) {
         loadPreview(leaf.id);
       }
