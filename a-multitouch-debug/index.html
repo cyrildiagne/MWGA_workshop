@@ -1,0 +1,150 @@
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title>Multitouch debug</title>
+    <style type="text/css">
+        html,body{ margin:0; padding:0; height:100%; width:100%; }
+        canvas {
+          height:100%;
+          width:100%;
+          overflow:hidden; /* or overflow:auto; if you want scrollbars */
+      }
+
+  </style>
+</head>
+<body>
+    <canvas id = "canvas" style="background-color: black;"></canvas>
+    <script type="text/javascript">
+
+        var colors = ['#fe0002', '#91c36a', '#169a47', '#68b682', '#1a226a', '#016aac', '#6b1d69', '#981468','#ce1b21', '#d84d2e', '#e6832e','#eea522'];
+
+        var canvas = document.getElementById('canvas');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        var ctx = canvas.getContext('2d');
+        ctx.fillStyle = "#ffffff";
+        ctx.strokeStyle = "#ffffff";
+
+        ctx.font = "bold "+ canvas.height * 0.05 +"px Helvetica, Arial sans-serif";
+
+        var ongoingTouches = [];
+
+        canvas.addEventListener("touchstart", function (evt) {
+              evt.preventDefault();
+
+              var touches = evt.changedTouches;
+
+              for (var i = 0; i < touches.length; i++) {
+                ongoingTouches.push(copyTouch(touches[i]));
+            }
+        }, false);
+
+            canvas.addEventListener("touchmove", function (evt) {
+                evt.preventDefault();
+
+                var touches = evt.changedTouches;
+
+                for (var i = 0; i < touches.length; i++) {
+                    var idx = ongoingTouchIndexById(touches[i].identifier);
+                    if (idx >= 0) {
+                        ongoingTouches.splice(idx, 1, copyTouch(touches[i]));
+                    }
+                }
+            }, false);
+
+            canvas.addEventListener("touchcancel", function (e) {
+                evt.preventDefault();
+                var touches = evt.changedTouches;
+
+                for (var i = 0; i < touches.length; i++) {
+                    var idx = ongoingTouchIndexById(touches[i].identifier);
+
+                    if (idx >= 0) {
+                          ongoingTouches.splice(idx, 1);  // remove it; we're done
+                      }
+                  }
+              }, false);
+
+            function colorForTouch(touch) {
+              var r = touch.identifier % 16;
+              var g = Math.floor(touch.identifier / 3) % 16;
+              var b = Math.floor(touch.identifier / 7) % 16;
+              r = r.toString(16); // make it a hex digit
+              g = g.toString(16); // make it a hex digit
+              b = b.toString(16); // make it a hex digit
+              var color = "#" + r + g + b;
+              return color;
+          }
+
+          function ongoingTouchIndexById(idToFind) {
+              for (var i = 0; i < ongoingTouches.length; i++) {
+                var id = ongoingTouches[i].identifier;
+                
+                if (id == idToFind) {
+                  return i;
+              }
+          }
+              return -1;    // not found
+          }
+
+
+          function copyTouch(touch) {
+              return { identifier: touch.identifier, pageX: touch.pageX, pageY: touch.pageY };
+          }
+
+          canvas.addEventListener("touchend", function (evt) {
+              evt.preventDefault();
+
+              var touches = evt.changedTouches;
+
+              for (var i = 0; i < touches.length; i++) {
+                var color = colorForTouch(touches[i]);
+                var idx = ongoingTouchIndexById(touches[i].identifier);
+
+                if (idx >= 0) {
+                          ongoingTouches.splice(idx, 1);  // remove it; we're done
+                      }
+                  }
+              }, false);
+
+          function draw()
+          {
+            ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+            ctx.fillText("Touches " + ongoingTouches.length, 10, 50);
+
+            var c = 0;
+            for (var i = 0; i < ongoingTouches.length; i++) {
+               var touch = ongoingTouches[i];
+                   //console.log(touch);
+                   ctx.strokeStyle = colors[c % colors.length];
+
+                   ctx.beginPath();
+                   ctx.arc(touch.pageX,touch.pageY, canvas.width * 0.03,0,2*Math.PI);
+                   ctx.lineWidth = canvas.width * 0.005;
+                   ctx.stroke();
+                   ctx.closePath();
+
+                    // Vertical
+                    ctx.beginPath();
+                    ctx.moveTo(0, touch.pageY);
+                    ctx.lineTo(canvas.width, touch.pageY);
+                    ctx.lineWidth = canvas.width * 0.005;
+                    ctx.stroke();
+
+                    // Horizontal
+                    ctx.beginPath();
+                    ctx.moveTo(touch.pageX, 0);
+                    ctx.lineTo(touch.pageX, canvas.height);
+                    ctx.lineWidth = canvas.width * 0.005;
+                    ctx.stroke();
+
+                    c++;
+                }
+                requestAnimationFrame(draw);
+            }
+            draw();
+
+        </script>
+    </body>
+    </html>
