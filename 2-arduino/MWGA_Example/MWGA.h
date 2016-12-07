@@ -15,6 +15,7 @@
 
 typedef std::function<void()> MWGACallback;
 typedef std::function<void(int)> MWGAConnectCallback;
+typedef std::function<void(const char * data)> MWGAMessageCallback;
 
 struct cmp_str{
   bool operator()(const char *a, const char *b){
@@ -24,23 +25,23 @@ struct cmp_str{
 
 class MWGA {
 public:
-  MWGA():server(80), webSocket(81){};
+  MWGA():server(80), webSocket(81) {};
   void setup();
   void update();
 
   void onConnect(MWGAConnectCallback handler);
   void on(const char* eventName, MWGACallback handler);
+  void onMessage(MWGAMessageCallback handler);
 
   void send(int num, String json) { webSocket.sendTXT(num, json); }
   void broadcast(String json) { webSocket.broadcastTXT(json); }
-  //ESP8266WebServer &getServer() { return server; }
-  //WebSocketsServer &getWebSocketServer() { return webSocket; }
 
 private:
   ESP8266WebServer server;
   WebSocketsServer webSocket;
 
   MWGAConnectCallback connectHandler;
+  MWGAMessageCallback messageHandler;
 
   /* custom socket events */
   std::map<const char*, MWGACallback, cmp_str> handlers;

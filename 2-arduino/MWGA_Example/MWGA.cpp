@@ -45,6 +45,10 @@ void MWGA::onConnect(MWGAConnectCallback handler){
   connectHandler = handler;
 }
 
+void MWGA::onMessage(MWGAMessageCallback handler){
+  messageHandler = handler;
+}
+
 void MWGA::on(const char* eventName, MWGACallback handler){
   handlers[eventName] = handler;
 }
@@ -218,12 +222,19 @@ void MWGA::webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t 
     break;
     case WStype_TEXT:
       Serial.printf("[%u] get Text: %s\n", num, payload);
-      const char * event = (const char *)payload;
-      if (handlers.find(event) != handlers.end()) {
-        handlers[event]();
-      } else {
-        Serial.printf("received unknown event: %s\n", event);
+      const char * data = (const char *)payload;
+      if (messageHandler) {
+        messageHandler(data);
       }
+
+      if (handlers.size()){
+        if (handlers.find(data) != handlers.end()) {
+          handlers[data]();
+        } else {
+          Serial.printf("received unknown event: %s\n", data);
+        }
+      }
+      
       webSocket.sendTXT(num, "{\"status\": \"OK\" }");
     break;
   }
