@@ -1,0 +1,144 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+        <title>Multitouch debug</title>
+        <style type="text/css">
+            html,body{ margin:0; padding:0; height:100%; width:100%; }
+            canvas {
+              height:100%;
+              width:100%;
+              overflow:hidden; /* or overflow:auto; if you want scrollbars */
+            }
+
+        </style>
+    </head>
+    
+    <body>
+        <canvas id = "canvas" style="background-color: black;"></canvas>
+        <script type="text/javascript">
+            var colors = ['#fe0002', '#91c36a',
+            '#169a47',
+            '#68b682',
+            '#1a226a',
+            '#016aac',
+            '#6b1d69',
+            '#981468',
+            '#ce1b21',
+            '#d84d2e',
+            '#e6832e',
+            '#eea522'
+            ];
+
+            var canvas = document.getElementById('canvas');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            var ctx = canvas.getContext('2d');
+            ctx.fillStyle = "#ffffff";
+            ctx.strokeStyle = "#ffffff";
+
+            ctx.font = "bold "+ canvas.height * 0.05 +"px Helvetica, Arial sans-serif";
+            var touches = {};
+
+            function launchIntoFullscreen(element) {
+              if(element.requestFullscreen) {
+                element.requestFullscreen();
+              } else if(element.mozRequestFullScreen) {
+                element.mozRequestFullScreen();
+              } else if(element.webkitRequestFullscreen) {
+                element.webkitRequestFullscreen();
+              } else if(element.msRequestFullscreen) {
+                element.msRequestFullscreen();
+              }
+            }
+
+            function getCanvasPos(canvasDom, e) {
+              var rect = canvasDom.getBoundingClientRect();
+              return {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+              };
+            }
+
+            // Touch events
+
+            function updateTouches(e){
+                for (var i = 0; i < e.changedTouches.length; i++) {
+                    var touch = e.touches[i];
+                    var t = getCanvasPos(canvas, touch);
+                    touches[touch.identifier] = t; 
+                }
+            };
+
+            canvas.addEventListener("touchstart", function (e) {
+                e.preventDefault();
+
+              mousePos = getCanvasPos(canvas, e);
+              updateTouches(e);
+              //launchIntoFullscreen(document.documentElement);
+            }, false);
+
+            canvas.addEventListener("touchmove", function (e) {
+                e.preventDefault();
+              updateTouches(e);
+            }, false);
+
+            canvas.addEventListener("touchcancel", function (e) {
+                                e.preventDefault();
+
+              for (var i = 0; i < e.changedTouches.length; i++) {
+                    var touch = e.changedTouches[i];
+                    delete touches[touch.identifier]; 
+                }
+            }, false);
+
+            canvas.addEventListener("touchend", function (e) {
+                e.preventDefault();
+
+              for (var i = 0; i < e.changedTouches.length; i++) {
+                    var touch = e.changedTouches[i];
+                    delete touches[touch.identifier]; 
+                }
+            }, false);
+
+            function draw()
+            {
+                ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+                var touchCount = Object.keys(touches).length;
+                ctx.fillText("Touches " + touchCount, 10, 50);
+
+                var c = 0;
+                for (var id in touches) {
+                   var touch = touches[id];
+
+                   ctx.strokeStyle = colors[c % colors.length];
+
+                   ctx.beginPath();
+                    ctx.arc(touch.x,touch.y, canvas.width * 0.03,0,2*Math.PI);
+                    ctx.lineWidth = canvas.width * 0.005;
+                    ctx.stroke();
+                    ctx.closePath();
+
+                    // Vertical
+                    ctx.beginPath();
+                    ctx.moveTo(0, touch.y);
+                    ctx.lineTo(canvas.width, touch.y);
+                    ctx.lineWidth = canvas.width * 0.005;
+                    ctx.stroke();
+
+                    // Horizontal
+                    ctx.beginPath();
+                    ctx.moveTo(touch.x, 0);
+                    ctx.lineTo(touch.x, canvas.height);
+                    ctx.lineWidth = canvas.width * 0.005;
+                    ctx.stroke();
+
+                    c++;
+                }
+                requestAnimationFrame(draw);
+            }
+            draw();
+
+        </script>
+    </body>
+</html>
