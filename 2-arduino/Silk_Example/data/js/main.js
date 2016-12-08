@@ -148,6 +148,7 @@ function end() {
 function onResize() {
   canvas.width = window.innerWidth * devicePixelRatio;
   canvas.height = window.innerHeight * devicePixelRatio;
+  draw();
 }
 
 setup();
