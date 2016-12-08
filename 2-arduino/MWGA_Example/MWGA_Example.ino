@@ -58,6 +58,10 @@ void createWifi(const char* ssid, const char* password){
   Serial.println("Access Point IP:" + WiFi.softAPIP().toString());
 }
 
+void onMessage(const char* data) {
+  // handle custom messages here
+}
+
 void setup() {
   delay(1000);
   Serial.begin(115200);
