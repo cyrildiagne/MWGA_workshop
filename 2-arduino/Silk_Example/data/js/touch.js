@@ -25,6 +25,10 @@ class Touches {
       ev.clientX = ev.touches[0].clientX;
       ev.clientY = ev.touches[0].clientY;
       if (ev.touches.length > 1) {
+        if (ev.touches[0].x > ev.touches[1].x) {
+          ev.clientX = ev.touches[1].x;
+          ev.clientY = ev.touches[1].y;
+        }
         width = Math.abs(ev.touches[0].clientX - ev.touches[1].clientX);
       }
     }
@@ -60,6 +64,10 @@ class Touches {
       ev.clientY = ev.touches[0].clientY;
       if (ev.touches.length > 1) {
         width = Math.abs(ev.touches[0].clientX - ev.touches[1].clientX);
+        if (ev.touches[0].x > ev.touches[1].x) {
+          ev.clientX = ev.touches[1].x;
+          ev.clientY = ev.touches[1].y;
+        }
       }
     }
     this.touches[0].current.x = ev.clientX * devicePixelRatio;
