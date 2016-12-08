@@ -67,8 +67,10 @@ void setup() {
   connectToWifi("TempForWorkshop", "ecal2016");
   mwga.setup();
   mwga.onConnect(onClientConnect);
+  mwga.onMessage(onMessage);
   mwga.on("/balls/in", onBallIn);
   mwga.on("/balls/out", onBallOut);
+  
   // set pin 12 as input
   pinMode(D6, INPUT_PULLUP);
 }
