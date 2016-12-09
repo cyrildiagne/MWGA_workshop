@@ -7,7 +7,8 @@ var interpolatedPointers = [];
 var pointersDraw = [];
 var interpolatedPointersDraw = [];
 var socket;
-
+var imagesUrls = ['img/img1.jpg'];
+var currentImage = 0;
 
 function setup() {
   canvas = document.getElementById('canvas');
@@ -17,7 +18,7 @@ function setup() {
   onResize();
 
   image = new Image();
-  image.src = 'http://ecal-mid.ch/students/2CV2016/screen_to_screen/test_silk.jpg';
+  image.src = 'http://' + location.host + '/www/' + imagesUrls[0];
   image.addEventListener('load', draw);
 
   touches = new Touches(window);
@@ -32,6 +33,15 @@ function setup() {
   }
 
   update();
+}
+
+function onButtonClicked() {
+  var img = new Image();
+  currentImage = ++currentImage % imagesUrls.length;
+  img.src = 'http://' + location.host + '/www/' + imagesUrls[currentImage];
+  img.addEventListener('load', function() {
+    ctx.drawImage(img, 0, 0);
+  });
 }
 
 function onWSMessage(data) {
@@ -117,7 +127,7 @@ function start(touch) {
 
 function move(touch) {
   if (IS_SCANNER) {
-    if (pointers.length > 100) {
+    if (pointers.length > 300) {
       return;
     }
     pointers.push({

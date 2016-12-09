@@ -7,8 +7,6 @@ var path = require('path');
 var port = 8000;
 
 var server = http.createServer(function(request, response) {
-  console.log('request starting...');
-
   var filePath = '.' + request.url;
   if (filePath == './')
     filePath = './index.html';
@@ -58,27 +56,20 @@ var server = http.createServer(function(request, response) {
 
 console.log('server started on port ' + port);
 
-var clients = [];
-
 var ws = new WebSocketServer({
   httpServer: server
 });
 ws.on("request", function(e) {
   var connection = e.accept(null, e.origin);
-  var nom = new Date().getTime();
-  console.log("new Client : " + nom);
-  clients[nom] = {
-    "connection": connection,
-    "role": ""
-  };
 
+  console.log("new client");
   connection.on('message', function(message) {
-    for (var name in clients) {
-      clients[name].connection.send(message.utf8Data);
-    }
+    console.log('broadcast');
+    connection.send('status');
+    ws.broadcast(message.utf8Data);
   });
 
   connection.on('close', function(connection) {
-    console.log("la connection " + connection + " a quitté");
+    console.log("client left");
   });
 });

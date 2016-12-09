@@ -37,12 +37,12 @@ class Sockets {
   }
 
   onWSMessage(evt) {
-    var json = JSON.parse(evt.data);
-    if (json.hasOwnProperty('id') && json.id === 0) {
-      // I'm first client
-    } else if (json.hasOwnProperty('status')) {
+    if (evt.data.indexOf('status') != -1) {
       this.isSendingLocked = false;
-    } else if (this.onMessage) {
+      return;
+    }
+    var json = JSON.parse(evt.data);
+    if (this.onMessage) {
       this.onMessage(json);
     }
   }
